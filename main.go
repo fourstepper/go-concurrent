@@ -37,18 +37,18 @@ func getTodo(id int, ch chan Todo, wg *sync.WaitGroup) {
 func main() {
 	var wg sync.WaitGroup
 	ch := make(chan Todo)
-	defer close(ch)
 
 	for i := 1; i < 6; i++ {
 		wg.Add(1)
-		go getTodo(i, ch, &wg)
+		go getTodo(i, ch, &wg) // produce results into channel "ch"
 	}
 
 	go func() {
-		for elem := range ch {
-			fmt.Println(elem)
-		}
+		wg.Wait() // wait until all job results are "produced" and close the channel
+		close(ch)
 	}()
 
-	wg.Wait()
+	for elem := range ch { // consume all results until channel is closed
+		fmt.Println(elem)
+	}
 }
